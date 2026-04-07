@@ -88,30 +88,44 @@ func (s ParcelStore) SetStatus(number int, status string) error {
 func (s ParcelStore) SetAddress(number int, address string) error {
 	// реализуйте обновление адреса в таблице parcel
 	// менять адрес можно только если значение статуса registered
-	parcel, err := s.Get(number)
+	result, err := s.db.Exec(
+		"UPDATE parcel SET address = ? WHERE number = ? AND status = ?",
+		address, number, ParcelStatusRegistered,
+	)
 	if err != nil {
 		return err
 	}
 
-	if parcel.Status != ParcelStatusRegistered {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
 		return errors.New("cannot change address: parcel is not in registered status")
 	}
 
-	_, err = s.db.Exec("UPDATE parcel SET address = ? WHERE number = ?", address, number)
-	return err
+	return nil
 }
 
 func (s ParcelStore) Delete(number int) error {
 	// Check if parcel status is registered before deleting
-	parcel, err := s.Get(number)
+	result, err := s.db.Exec(
+		"DELETE FROM parcel WHERE number = ? AND status = ?",
+		number, ParcelStatusRegistered,
+	)
 	if err != nil {
 		return err
 	}
 
-	if parcel.Status != ParcelStatusRegistered {
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
 		return errors.New("cannot delete parcel: parcel is not in registered status")
 	}
 
-	_, err = s.db.Exec("DELETE FROM parcel WHERE number = ?", number)
-	return err
+	return nil
 }
