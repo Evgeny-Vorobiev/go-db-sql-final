@@ -49,10 +49,10 @@ func TestAddGetDelete(t *testing.T) {
 	// проверьте, что значения всех полей в полученном объекте совпадают со значениями полей в переменной parcel
 	retrievedParcel, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, parcel.Client, retrievedParcel.Client)
-	require.Equal(t, parcel.Status, retrievedParcel.Status)
-	require.Equal(t, parcel.Address, retrievedParcel.Address)
-	require.Equal(t, parcel.CreatedAt, retrievedParcel.CreatedAt)
+
+	expected := parcel
+	expected.Number = retrievedParcel.Number
+	require.Equal(t, expected, retrievedParcel)
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
@@ -89,7 +89,11 @@ func TestSetAddress(t *testing.T) {
 	// получите добавленную посылку и убедитесь, что адрес обновился
 	retrievedParcel, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, newAddress, retrievedParcel.Address)
+
+	expected := parcel
+	expected.Address = newAddress
+	expected.Number = retrievedParcel.Number
+	require.Equal(t, expected, retrievedParcel)
 }
 
 // TestSetStatus проверяет обновление статуса
@@ -118,7 +122,11 @@ func TestSetStatus(t *testing.T) {
 	// получите добавленную посылку и убедитесь, что статус обновился
 	retrievedParcel, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, newStatus, retrievedParcel.Status)
+
+	expected := parcel
+	expected.Status = newStatus
+	expected.Number = retrievedParcel.Number
+	require.Equal(t, expected, retrievedParcel)
 }
 
 // TestGetByClient проверяет получение посылок по идентификатору клиента
@@ -170,9 +178,7 @@ func TestGetByClient(t *testing.T) {
 		require.True(t, exists, "Parcel with number %d not found in expected map", parcel.Number)
 		// убедитесь, что все посылки из storedParcels есть в parcelMap
 		// убедитесь, что значения полей полученных посылок заполнены верно
-		require.Equal(t, expectedParcel.Client, parcel.Client)
-		require.Equal(t, expectedParcel.Status, parcel.Status)
-		require.Equal(t, expectedParcel.Address, parcel.Address)
-		require.Equal(t, expectedParcel.CreatedAt, parcel.CreatedAt)
+		expectedParcel.Number = parcel.Number
+		require.Equal(t, expectedParcel, parcel)
 	}
 }
